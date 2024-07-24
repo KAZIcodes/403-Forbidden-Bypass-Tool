@@ -38,6 +38,7 @@ Url
 X-Forward-For
 X-Forwarded-By
 X-Forwarded-For-Original
+X-Forwarded-For-Original-IP
 X-Forwarded-Server
 X-Forwarded
 X-Forwarder-For
@@ -49,3 +50,16 @@ X-Real-Ip
 X-Remote-Addr
 X-OReferrer
 X-Cluster-Client-Ip
+Forwarded
+X-Forwarded-Client-IP
+X-Forwarded-Port
+Via
+X-Original-Request
+X-Rewrite-Request
+X-Original-URI
+X-Forwarded-Request-URI
+X-Forwarded-Host-Original
+X-Override-URL
+X-Proxy-Origin
+X-Real-Host
+X-Forwarded-Uri
