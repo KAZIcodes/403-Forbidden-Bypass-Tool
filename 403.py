@@ -9,7 +9,8 @@ init(autoreset=True)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Send HTTP requests with various headers.")
-    parser.add_argument('--url', required=True, help="Path to the file containing URLs.")
+    parser.add_argument('--urls', help="Path to the file containing URLs.")
+    parser.add_argument('-u', help="Single URL to test.")
     parser.add_argument('--ips', required=True, help="Path to the file containing IPs or domains.")
     parser.add_argument('--headers', help="Path to the file containing headers to test.")
     parser.add_argument('--verb_tamper', action='store_true', help="Perform verb tampering with multiple HTTP methods.")
@@ -57,7 +58,16 @@ def send_requests(urls, ips, headers_to_test, verb_tamper, output=None):
 
 def main():
     args = parse_args()
-    urls = read_file(args.url)
+    
+    if not args.urls and not args.url:
+        print("Error: Either --urls or -u must be specified.")
+        return
+    
+    if args.urls:
+        urls = read_file(args.urls)
+    else:
+        urls = [args.url]
+    
     raw_ips = read_file(args.ips)
     
     ips = []
