@@ -2,6 +2,7 @@ import argparse
 import requests
 from colorama import init, Fore, Style
 import ipaddress
+import os
 
 # Initialize colorama
 init(autoreset=True)
@@ -10,6 +11,8 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Send HTTP requests with various headers.")
     parser.add_argument('--url', required=True, help="Path to the file containing URLs.")
     parser.add_argument('--ips', required=True, help="Path to the file containing IPs or domains.")
+    parser.add_argument('--headers', help="Path to the file containing headers to test.")
+    parser.add_argument('--verb_tamper', action='store_true', help="Perform verb tampering with multiple HTTP methods.")
     parser.add_argument('-o', '--output', help="Path to the output file.")
     return parser.parse_args()
 
@@ -21,9 +24,8 @@ def expand_ip_range(ip_range):
     network = ipaddress.ip_network(ip_range, strict=False)
     return [str(ip) for ip in network.hosts()]
 
-def send_requests(urls, ips, output=None):
-    methods = ['GET', 'POST', 'PUT', 'DELETE']
-    headers_to_test = ['X-Forwarded-For', 'X-Forwarded-Host']
+def send_requests(urls, ips, headers_to_test, verb_tamper, output=None):
+    methods = ['GET', 'POST', 'PUT', 'DELETE'] if verb_tamper else ['GET']
     results = []
 
     for url in urls:
@@ -64,8 +66,14 @@ def main():
             ips.extend(expand_ip_range(ip))
         else:
             ips.append(ip)
-
-    send_requests(urls, ips, args.output)
+    
+    headers_file = args.headers if args.headers else 'default_headers.txt'
+    if not os.path.isfile(headers_file):
+        print(f"Error: Headers file '{headers_file}' not found.")
+        return
+    
+    headers_to_test = read_file(headers_file)
+    send_requests(urls, ips, headers_to_test, args.verb_tamper, args.output)
 
 if __name__ == "__main__":
     main()
