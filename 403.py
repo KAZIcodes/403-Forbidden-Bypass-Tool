@@ -38,6 +38,7 @@ def send_requests(urls, ips, headers_to_test, verb_tamper, time_delay, output=No
                     headers = {header: ip}
                     response = requests.request(method, url, headers=headers)
                     status_code = response.status_code
+                    response_size = len(response.content)
                     title = response.text.split('<title>')[1].split('</title>')[0] if '<title>' in response.text else 'No Title'
                     
                     if status_code == 200:
@@ -47,7 +48,7 @@ def send_requests(urls, ips, headers_to_test, verb_tamper, time_delay, output=No
                     else:
                         color = Fore.RED
                     
-                    result_line = f"{color}{status_code} {url} {method} {header}: {ip} - {title}"
+                    result_line = f"{color}{status_code} {url} {method} {header}: {ip} - {title} (Size: {response_size} bytes)"
                     results.append(result_line)
                     print(result_line)
                     
