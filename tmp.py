@@ -4,22 +4,23 @@ from colorama import init, Fore, Style
 import ipaddress
 import os
 import time
+import urllib3
+import http.client
 
 # Initialize colorama
 init(autoreset=True)
 
-# Suppress InsecureRequestWarning from urllib3
-requests.packages.urllib3.disable_warnings(requests.packages.urllib3.exceptions.InsecureRequestWarning)
+# Suppress only the single InsecureRequestWarning from urllib3 needed
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def parse_args():
     parser = argparse.ArgumentParser(description="Send HTTP requests with various headers.")
     parser.add_argument('--urls', help="Path to the file containing URLs.")
     parser.add_argument('-url', help="Single URL to test.")
     parser.add_argument('--ips', required=True, help="Path to the file containing IPs or domains.")
-    parser.add_argument('--headers', help="Path to the file containing default headers to test.")
+    parser.add_argument('--headers', help="Path to the file containing headers to test.")
     parser.add_argument('--verb_tamper', action='store_true', help="Perform verb tampering with multiple HTTP methods.")
     parser.add_argument('--proxy', help="Proxy URL to use for the requests.")
-    parser.add_argument('-H', action='append', help="Custom headers to include or replace in the request (e.g., -H 'User-Agent: mamad').")
     parser.add_argument('-o', '--output', help="Path to the output file.")
     parser.add_argument('-t', '--time_delay', type=float, default=0, help="Time delay between each request in seconds.")
     return parser.parse_args()
@@ -32,11 +33,24 @@ def expand_ip_range(ip_range):
     network = ipaddress.ip_network(ip_range, strict=False)
     return [str(ip) for ip in network.hosts()]
 
-def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_delay, proxy, output=None):
+def print_raw_http_request(method, url, headers):
+    parsed_url = requests.utils.urlparse(url)
+    path = parsed_url.path or "/"
+    if parsed_url.query:
+        path += "?" + parsed_url.query
+
+    request_line = f"{method} {path} HTTP/1.1"
+    host_header = f"Host: {parsed_url.netloc}"
+    headers_list = [f"{key}: {value}" for key, value in headers.items()]
+
+    raw_request = f"{request_line}\r\n{host_header}\r\n" + "\r\n".join(headers_list) + "\r\n\r\n"
+    print("Raw HTTP Request to be made:\n")
+    print(raw_request)
+
+def send_requests(urls, ips, headers_to_test, verb_tamper, time_delay, proxy, output=None):
     methods = ['GET', 'POST', 'PUT', 'DELETE'] if verb_tamper else ['GET']
     results = []
 
-    # Set up proxy if provided
     proxies = {
         "http": proxy,
         "https": proxy
@@ -47,15 +61,7 @@ def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_
             for header in headers_to_test:
                 for ip in ips:
                     headers = {header: ip}
-                    # Include or replace custom headers
-                    if custom_headers:
-                        for custom_header in custom_headers:
-                            key, value = custom_header.split(':', 1)
-                            headers[key.strip()] = value.strip()
-
-                    # Print the raw HTTP request for debugging
                     print_raw_http_request(method, url, headers)
-                    
                     try:
                         response = requests.request(method, url, headers=headers, verify=False, proxies=proxies)  # Disable SSL verification
                         status_code = response.status_code
@@ -70,12 +76,10 @@ def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_
                             color = Fore.RED
                         
                         result_line = f"{color}{status_code} {url} {method} {header}: {ip} - {title} (Size: {response_size} bytes)"
-                        results.append(result_line)
                         print(result_line)
-                        
+                        results.append(result_line)
                     except requests.RequestException as e:
                         print(f"Request to {url} failed: {e}")
-
                     time.sleep(time_delay)
     
     if output:
@@ -84,21 +88,6 @@ def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_
                 # Remove color codes for file output
                 clean_line = line.replace(Fore.GREEN, '').replace(Fore.YELLOW, '').replace(Fore.RED, '').replace(Style.RESET_ALL, '')
                 outfile.write(clean_line + "\n")
-
-def print_raw_http_request(method, url, headers):
-    from requests.utils import urlparse
-    parsed_url = urlparse(url)
-    path = parsed_url.path or "/"
-    if parsed_url.query:
-        path += "?" + parsed_url.query
-
-    request_line = f"{method} {path} HTTP/1.1"
-    host_header = f"Host: {parsed_url.netloc}"
-    headers_list = [f"{key}: {value}" for key, value in headers.items()]
-
-    raw_request = f"{request_line}\r\n{host_header}\r\n" + "\r\n".join(headers_list) + "\r\n\r\n"
-    print("Raw HTTP Request to be made:\n")
-    print(raw_request)
 
 def main():
     args = parse_args()
@@ -116,7 +105,7 @@ def main():
     
     ips = []
     for ip in raw_ips:
-        if '/' in ip and not '://' in ip:
+        if '/' in ip and '://' not in ip:
             ips.extend(expand_ip_range(ip))
         else:
             ips.append(ip)
@@ -127,7 +116,7 @@ def main():
         return
     
     headers_to_test = read_file(headers_file)
-    send_requests(urls, ips, headers_to_test, args.H, args.verb_tamper, args.time_delay, args.proxy, args.output)
+    send_requests(urls, ips, headers_to_test, args.verb_tamper, args.time_delay, args.proxy, args.output)
 
 if __name__ == "__main__":
     main()

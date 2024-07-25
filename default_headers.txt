@@ -63,3 +63,4 @@ X-Override-URL
 X-Proxy-Origin
 X-Real-Host
 X-Forwarded-Uri
+X-Requested-With
