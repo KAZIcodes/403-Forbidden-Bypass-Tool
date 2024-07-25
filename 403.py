@@ -3,6 +3,7 @@ import requests
 from colorama import init, Fore, Style
 import ipaddress
 import os
+import time
 
 # Initialize colorama
 init(autoreset=True)
@@ -10,11 +11,12 @@ init(autoreset=True)
 def parse_args():
     parser = argparse.ArgumentParser(description="Send HTTP requests with various headers.")
     parser.add_argument('--urls', help="Path to the file containing URLs.")
-    parser.add_argument('-u', help="Single URL to test.")
+    parser.add_argument('-url', help="Single URL to test.")
     parser.add_argument('--ips', required=True, help="Path to the file containing IPs or domains.")
     parser.add_argument('--headers', help="Path to the file containing headers to test.")
     parser.add_argument('--verb_tamper', action='store_true', help="Perform verb tampering with multiple HTTP methods.")
     parser.add_argument('-o', '--output', help="Path to the output file.")
+    parser.add_argument('-t', '--time_delay', type=float, default=0, help="Time delay between each request in seconds.")
     return parser.parse_args()
 
 def read_file(file_path):
@@ -25,7 +27,7 @@ def expand_ip_range(ip_range):
     network = ipaddress.ip_network(ip_range, strict=False)
     return [str(ip) for ip in network.hosts()]
 
-def send_requests(urls, ips, headers_to_test, verb_tamper, output=None):
+def send_requests(urls, ips, headers_to_test, verb_tamper, time_delay, output=None):
     methods = ['GET', 'POST', 'PUT', 'DELETE'] if verb_tamper else ['GET']
     results = []
 
@@ -48,6 +50,8 @@ def send_requests(urls, ips, headers_to_test, verb_tamper, output=None):
                     result_line = f"{color}{status_code} {url} {method} {header}: {ip} - {title}"
                     results.append(result_line)
                     print(result_line)
+                    
+                    time.sleep(time_delay)
     
     if output:
         with open(output, 'w') as outfile:
@@ -60,7 +64,7 @@ def main():
     args = parse_args()
     
     if not args.urls and not args.url:
-        print("Error: Either --urls or -u must be specified.")
+        print("Error: Either --urls or -url must be specified.")
         return
     
     if args.urls:
@@ -83,7 +87,7 @@ def main():
         return
     
     headers_to_test = read_file(headers_file)
-    send_requests(urls, ips, headers_to_test, args.verb_tamper, args.output)
+    send_requests(urls, ips, headers_to_test, args.verb_tamper, args.time_delay, args.output)
 
 if __name__ == "__main__":
     main()
