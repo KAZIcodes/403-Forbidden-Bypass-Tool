@@ -42,7 +42,7 @@ Note that if —headers is not specified then default_headers.txt will be used a
 
 ## Installation
 
-Install the required Python libraries using pip:
+Clone the repository and install the required Python libraries using pip:
 
 ```
 git clone https://github.com/KAZIcodes/403-Forbidden-Bypass-Tool.git
