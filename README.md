@@ -13,6 +13,7 @@ Long story short, this script is good when you have some endpoints with 403 resp
 This script allows you to:
 
 - Send HTTP requests with your provided bypass headers instead of **default_headers.txt**
+- Provide CIDR ranges in the IPs or domains file, and it will automatically expand and test all IPs within those ranges
 - Include additional custom headers provided via the command line
 - Perform verb tampering with 'GET', 'POST', 'PUT', 'PATCH' and 'DELETE’ HTTP methods for each request
 - Use a proxy for the requests
