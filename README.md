@@ -45,6 +45,7 @@ Note that if —headers is not specified then default_headers.txt will be used a
 Install the required Python libraries using pip:
 
 ```
+git clone https://github.com/KAZIcodes/403-Forbidden-Bypass-Tool.git
 pip install requests colorama
 ```
 
