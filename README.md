@@ -1,7 +1,5 @@
 # 403 Forbidden Bypass Tool
 
----
-
 ## Description
 
 This script is designed for penetration testing and bug bounty hunting, specifically to bypass 403 Forbidden endpoints discovered during the reconnaissance phase. It achieves this by leveraging the following methodology:
@@ -28,7 +26,7 @@ This script allows you to:
 - `--ips`: Path to the file containing line separated IPs or domains
 - `--headers`: Path to the file containing line separated bypass headers to test
 - `--verb_tamper`: Perform verb(HTTP method) tampering by specifying this switch
-- `-H`: Custom headers to include or replace in the request (e.g., `-H 'User-Agent: random'`
+- `-H`: Custom headers to include or replace in the request (e.g., `-H 'User-Agent: random'`)
 - `--proxy`: Proxy URL to use for the requests.
 - `-t`, `--time_delay`: Time delay between each request in seconds
 - `-o`, `--output`: Path to the output file
