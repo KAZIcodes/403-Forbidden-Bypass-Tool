@@ -52,12 +52,9 @@ def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_
                         for custom_header in custom_headers:
                             key, value = custom_header.split(':', 1)
                             headers[key.strip()] = value.strip()
-
-                    # Print the raw HTTP request for debugging
-                    print_raw_http_request(method, url, headers)
                     
                     try:
-                        response = requests.request(method, url, headers=headers, verify=False, proxies=proxies)  # Disable SSL verification
+                        response = requests.request(method, url, headers=headers, verify=False, proxies=proxies)
                         status_code = response.status_code
                         response_size = len(response.content)
                         title = response.text.split('<title>')[1].split('</title>')[0] if '<title>' in response.text else 'No Title'
@@ -85,20 +82,6 @@ def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_
                 clean_line = line.replace(Fore.GREEN, '').replace(Fore.YELLOW, '').replace(Fore.RED, '').replace(Style.RESET_ALL, '')
                 outfile.write(clean_line + "\n")
 
-def print_raw_http_request(method, url, headers):
-    from requests.utils import urlparse
-    parsed_url = urlparse(url)
-    path = parsed_url.path or "/"
-    if parsed_url.query:
-        path += "?" + parsed_url.query
-
-    request_line = f"{method} {path} HTTP/1.1"
-    host_header = f"Host: {parsed_url.netloc}"
-    headers_list = [f"{key}: {value}" for key, value in headers.items()]
-
-    raw_request = f"{request_line}\r\n{host_header}\r\n" + "\r\n".join(headers_list) + "\r\n\r\n"
-    print("Raw HTTP Request to be made:\n")
-    print(raw_request)
 
 def main():
     args = parse_args()
@@ -116,7 +99,7 @@ def main():
     
     ips = []
     for ip in raw_ips:
-        if '/' in ip and not '://' in ip:
+        if '/' in ip and '://' not in ip:
             ips.extend(expand_ip_range(ip))
         else:
             ips.append(ip)

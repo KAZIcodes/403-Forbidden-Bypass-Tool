@@ -23,7 +23,7 @@ This script allows you to:
 
 - `--urls`: Path to the file containing line separated URLs
 - `-url`: Single URL to test
-- `--ips`: Path to the file containing line separated IPs or domains
+- `--ips`: Path to the file containing line separated IPs or domains to test
 - `--headers`: Path to the file containing line separated bypass headers to test
 - `--verb_tamper`: Perform verb(HTTP method) tampering by specifying this switch
 - `-H`: Custom headers to include or replace in the request (e.g., `-H 'User-Agent: random'`)
