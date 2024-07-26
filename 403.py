@@ -33,7 +33,7 @@ def expand_ip_range(ip_range):
     return [str(ip) for ip in network.hosts()]
 
 def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_delay, proxy, output=None):
-    methods = ['GET', 'POST', 'PUT', 'DELETE'] if verb_tamper else ['GET']
+    methods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'] if verb_tamper else ['GET']
     results = []
 
     # Set up proxy if provided
