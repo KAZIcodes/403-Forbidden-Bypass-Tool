@@ -90,3 +90,6 @@ X-True-Client-IP
 X-True-IP
 X-WAP-Profile
 X-Wap-Profile
+X-Envoy-Original-Dst-Host
+X-Envoy-internal
+X-Envoy-external-adress
