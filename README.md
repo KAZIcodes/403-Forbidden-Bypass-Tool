@@ -18,6 +18,7 @@ This script allows you to:
 - Perform verb tampering with 'GET', 'POST', 'PUT', 'PATCH' and 'DELETE’ HTTP methods for each request
 - Use a proxy for the requests
 - Specify a delay between each request (specially good for when fuzzing a service behind a CDN or WAF)
+- Resume from where it left off during the previous run
 - Save the results to an output file
 
 ## Options
