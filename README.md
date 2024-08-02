@@ -30,6 +30,7 @@ This script allows you to:
 - `-H`: Custom headers to include or replace in the request (e.g., `-H 'User-Agent: random'`)
 - `--proxy`: Proxy URL to use for the requests.
 - `-t`, `--time_delay`: Time delay between each request in seconds
+- `--resume`: Resume from the last saved state
 - `-o`, `--output`: Path to the output file
 
 Note that if —headers is not specified then default_headers.txt will be used and if —verb_tamper is not specified then the requests are only made with ’GET’ method and if -H or —proxy or -t options are not specified the requests will be made with no proxy and no time delay and no additional headers.
