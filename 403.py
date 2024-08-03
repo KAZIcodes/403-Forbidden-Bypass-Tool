@@ -73,75 +73,72 @@ def send_requests(urls, ips, headers_to_test, custom_headers, verb_tamper, time_
         if progress:
             start_point = progress
 
-    for url_index, url in enumerate(urls[start_point['url_index']:], start=start_point['url_index']):
-        for method_index, method in enumerate(methods[start_point['method_index']:], start=start_point['method_index']):
-            for header_index, header in enumerate(headers_to_test[start_point['header_index']:], start=start_point['header_index']):
-                for ip_index, ip in enumerate(ips[start_point['ip_index']:], start=start_point['ip_index']):
-                    headers = {header: ip}
-                    # Include or replace custom headers
-                    if custom_headers:
-                        for custom_header in custom_headers:
-                            key, value = custom_header.split(':', 1)
-                            headers[key.strip()] = value.strip()
-                    
-                    try:
-                        response = requests.request(method, url, headers=headers, verify=False, proxies=proxies)
-                        status_code = response.status_code
-                        response_size = len(response.content)
-                        title = response.text.split('<title>')[1].split('</title>')[0] if '<title>' in response.text else 'No Title'
-                        
-                        if status_code == 200:
-                            color = Fore.GREEN
-                        elif status_code in range(300, 400) or status_code == 404 or status_code in range(500, 600):
-                            color = Fore.YELLOW
-                        else:
-                            color = Fore.RED
-                        
-                        result_line = f"{color}{status_code} {url} {method} {header}: {ip} - {title} (Size: {response_size} bytes)"
-                        results.append(result_line)
-                        print(result_line)
-                        
-                    except requests.RequestException as e:
-                        print(f"Request to {url} failed: {e}")
+    with open(output, 'a') if output else None as outfile:
+        for url_index, url in enumerate(urls[start_point['url_index']:], start=start_point['url_index']):
+            for method_index, method in enumerate(methods[start_point['method_index']:], start=start_point['method_index']):
+                for header_index, header in enumerate(headers_to_test[start_point['header_index']:], start=start_point['header_index']):
+                    for ip_index, ip in enumerate(ips[start_point['ip_index']:], start=start_point['ip_index']):
+                        headers = {header: ip}
+                        # Include or replace custom headers
+                        if custom_headers:
+                            for custom_header in custom_headers:
+                                key, value = custom_header.split(':', 1)
+                                headers[key.strip()] = value.strip()
 
-                    time.sleep(time_delay)
+                        try:
+                            response = requests.request(method, url, headers=headers, verify=False, proxies=proxies)
+                            status_code = response.status_code
+                            response_size = len(response.content)
+                            title = response.text.split('<title>')[1].split('</title>')[0] if '<title>' in response.text else 'No Title'
 
-                    save_progress(url_index, method_index, header_index, ip_index)
-    
-    if output:
-        with open(output, 'w') as outfile:
-            for line in results:
-                # Remove color codes for file output
-                clean_line = line.replace(Fore.GREEN, '').replace(Fore.YELLOW, '').replace(Fore.RED, '').replace(Style.RESET_ALL, '')
-                outfile.write(clean_line + "\n")
+                            if status_code == 200:
+                                color = Fore.GREEN
+                            elif status_code in range(300, 400) or status_code == 404 or status_code in range(500, 600):
+                                color = Fore.YELLOW
+                            else:
+                                color = Fore.RED
 
+                            result_line = f"{color}{status_code} {url} {method} {header}: {ip} - {title} (Size: {response_size} bytes)"
+                            results.append(result_line)
+                            print(result_line)
+
+                            if outfile:
+                                clean_line = result_line.replace(Fore.GREEN, '').replace(Fore.YELLOW, '').replace(Fore.RED, '').replace(Style.RESET_ALL, '')
+                                outfile.write(clean_line + "\n")
+
+                        except requests.RequestException as e:
+                            print(f"Request to {url} failed: {e}")
+
+                        time.sleep(time_delay)
+
+                        save_progress(url_index, method_index, header_index, ip_index)
 
 def main():
     args = parse_args()
-    
+
     if not args.urls and not args.url:
         print("Error: Either --urls or -url must be specified.")
         return
-    
+
     if args.urls:
         urls = read_file(args.urls)
     else:
         urls = [args.url]
-    
+
     raw_ips = read_file(args.ips)
-    
+
     ips = []
     for ip in raw_ips:
         if '/' in ip and '://' not in ip:
             ips.extend(expand_ip_range(ip))
         else:
             ips.append(ip)
-    
+
     headers_file = args.headers if args.headers else 'default_headers.txt'
     if not os.path.isfile(headers_file):
         print(f"Error: Headers file '{headers_file}' not found.")
         return
-    
+
     headers_to_test = read_file(headers_file)
     send_requests(urls, ips, headers_to_test, args.H, args.verb_tamper, args.time_delay, args.proxy, args.output, args.resume)
 
